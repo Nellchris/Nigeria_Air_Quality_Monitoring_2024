@@ -55,7 +55,8 @@ L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
   attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
   subdomains: 'abcd',
   maxZoom: 19
-}).addTo(map)
+}).addTo(map);
+
 // ====================
 // Info Control (top-left)
 // ====================
@@ -181,7 +182,7 @@ var baseMaps = {
   "Sulphur Dioxide (SO₂)": so2Layer
 };
 
-L.control.layers(baseMaps, null).addTo(map);
+L.control.layers(baseMaps, null, {collapsed:false}).addTo(map);
 
 // Default layer
 methaneLayer.addTo(map);
