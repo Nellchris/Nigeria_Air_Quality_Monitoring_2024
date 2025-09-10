@@ -1,149 +1,17 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="utf-8">
+  <title>Nigeria Air Quality Monitoring (2024)</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Nigeria Methane and Sulphur Dioxide Monitoring 2024</title>
-
-  <!-- Leaflet CSS -->
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
   <style>
-    body { margin: 0; padding: 0;}
-    #map { width: 100%; height: 100vh;}
-  </style>
-</head>
-<body>
-  <div id="map"></div>
-
-  <!-- Leaflet JS -->
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-  <script src="lib/L.Geoserver.js"></script>
-
-  <script>
-  
-    // Map Initialization
-    var map = L.map("map").setView([9.1, 8.6], 2);
-
-    // OSM Layer
-    var osm = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-    }).addTo(map);
-
-// methane
-    var ch4wmsLayer = L.Geoserver.wms("http://localhost:8080/geoserver/wms", {
-  layers: "Nigeria_ch4_2024",
-});
-
-var ch4wfsLayer = L.Geoserver.wfs("http://localhost:8080/geoserver/wfs", {
-   layers: "Nigeria_ch4_2024",
-  style: {
-    color: "black",
-    fillOpacity: 0.1,
-    opacity: 0.3,
-  },
-  onEachFeature: function (feature, layer) {
-  var tooltipContent = "<b>State: </b>" + feature.properties.Country;
-
-  layer.bindTooltip(tooltipContent, {
-    permanent: false,   // only show on hover
-    direction: "top",   // position relative to cursor
-    sticky: true        // makes it follow the cursor
-  });
-}
-});
-ch4wfsLayer.addTo(map);
-
-// sulphur dioxide
-    var so2wmsLayer = L.Geoserver.wms("http://localhost:8080/geoserver/wms", {
-  layers: "Nigeria_so2_2024",
-});
-
-var so2wfsLayer = L.Geoserver.wfs("http://localhost:8080/geoserver/wfs", {
-   layers: "Nigeria_so2_2024",
-  style: {
-    color: "black",
-    fillOpacity: 0.1,
-    opacity: 0.3,
-  },
-  onEachFeature: function (feature, layer) {
-  var tooltipContent = "<b>State: </b>" + feature.properties.Country;
-
-  layer.bindTooltip(tooltipContent, {
-    permanent: false,   // only show on hover
-    direction: "top",   // position relative to cursor
-    sticky: true        // makes it follow the cursor
-  });
-}
-});
-so2wfsLayer.addTo(map);
-
-// methane legend
-var ch4Legend = L.Geoserver.legend("http://localhost:8080/geoserver/wms", {
-  layers: "Nigeria_ch4_2024",
-  //style: `stylefile`,
-});
-
-
-// sulphur dioxide legend
-var so2Legend = L.Geoserver.legend("http://localhost:8080/geoserver/wms", {
-  layers: "Nigeria_so2_2024",
-  //style: `stylefile`,
-});
-
-    
-var baseMaps = {
-  "Methane (CH₄)": ch4wmsLayer,
-  "Sulphur Dioxide (SO₂)": so2wmsLayer
-};
-L.control.layers(baseMaps, null, {collapsed:false}).addTo(map);
-
-// Default = Methane layer + legend
-ch4wmsLayer.addTo(map);
-ch4Legend.addTo(map);
-
-// Listen for base layer changes
-map.on("baselayerchange", function(e) {
-  if (e.name === "Methane (CH₄)") {
-    map.addControl(ch4Legend);
-    map.removeControl(so2Legend);
-  }
-  if (e.name === "Sulphur Dioxide (SO₂)") {
-    map.addControl(so2Legend);
-    map.removeControl(ch4Legend);
-  }
-});
-
-    // === Add the info control here ===
-    var info = L.control({position: 'topleft'});
-
-    info.onAdd = function (map) {
-      var div = L.DomUtil.create('div', 'info'); 
-      div.innerHTML = `
-        <h4>Nigeria Methane and Sulphur Dioxide Monitoring 2024</h4>
-        <p>
-          This interactive map shows state-level averages of 
-          <b>Methane (CH₄)</b> and <b>Sulphur Dioxide (SO₂)</b> 
-          concentrations derived from Sentinel-5P dataset for 2024.
-        </p>
-        <p>
-          • Use the <b>layer switcher</b> (top-right) to toggle between CH₄ and SO₂.<br>
-          • The legend updates automatically for the selected pollutant.<br>
-          • Each state is coloured based on its average concentration.
-        </p>
-        <p style="font-size:11px; color:gray;">
-          Data Source: Copernicus Sentinel-5P (ESA), Processed on Google Earth Engine, 
-          Served via GeoServer.
-        </p>
-      `;
-      return div;
-    };
-
-    info.addTo(map);
-  </script>
-
-<style>
-  .info {
+    #map {
+      height: 100vh;
+      width: 100%;
+    }
+    .info {
       padding: 8px 12px;
       background: white;
       box-shadow: 0 0 15px rgba(0,0,0,0.2);
@@ -157,6 +25,177 @@ map.on("baselayerchange", function(e) {
       color: #444;
       font-size: 14px;
     }
-</style>
+    .legend {
+      line-height: 18px;
+      color: #555;
+      background: white;
+      padding: 6px 8px;
+      box-shadow: 0 0 15px rgba(0,0,0,0.2);
+      border-radius: 6px;
+    }
+    .legend i {
+      width: 18px;
+      height: 18px;
+      float: left;
+      margin-right: 8px;
+      opacity: 0.7;
+    }
+  </style>
+</head>
+<body>
+<div id="map"></div>
+
+<script>
+// ====================
+// Map Setup
+// ====================
+var map = L.map('map').setView([9.082, 8.6753], 6);
+
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+  attribution: '&copy; OpenStreetMap contributors'
+}).addTo(map);
+
+// ====================
+// Info Control (top-left)
+// ====================
+var info = L.control({position: 'topleft'});
+info.onAdd = function () {
+  var div = L.DomUtil.create('div', 'info');
+  div.innerHTML = `
+    <h4>Nigeria Air Quality Monitoring</h4>
+    <p>
+      This map shows state-level averages of 
+      <b>Methane (CH₄)</b> and <b>Sulphur Dioxide (SO₂)</b> 
+      for 2024, derived from Sentinel-5P.
+    </p>
+    <p>
+      • Use the <b>layer switcher</b> (top-right) to toggle between methane and sulphur dioxide.<br>
+      • The legend updates automatically.<br>
+      • Click a state to view its values.
+    </p>
+    <p style="font-size:11px; color:gray;">
+      Data: Copernicus Sentinel-5P (ESA)<br>
+      Processed with Google Earth Engine, Visualised in Leaflet
+    </p>
+  `;
+  return div;
+};
+info.addTo(map);
+
+// ====================
+// Color Scales (using your values)
+// ====================
+function getColorMethane(d) {
+  return d > 1946.7 ? "#800026" :
+         d > 1941.4 ? "#BD0026" :
+         d > 1936.1 ? "#E31A1C" :
+         d > 1930.8 ? "#FC4E2A" :
+         d > 1925.5 ? "#FD8D3C" :
+                      "#FEB24C";
+}
+
+function getColorSO2(d) {
+  return d > 0.0000346 ? "#08306b" :
+         d > 0.0000266 ? "#2171b5" :
+         d > 0.0000185 ? "#4292c6" :
+         d > 0.0000105 ? "#6baed6" :
+         d > 0.0000024 ? "#9ecae1" :
+                         "#c6dbef";
+}
+
+// ====================
+// Legends
+// ====================
+var methaneLegend = L.control({position: 'bottomright'});
+methaneLegend.onAdd = function () {
+  var div = L.DomUtil.create('div', 'legend'),
+      grades = [1925.5, 1930.8, 1936.1, 1941.4, 1946.7];
+  div.innerHTML = '<b>Methane (mol fraction)</b><br>';
+  for (var i = 0; i < grades.length; i++) {
+    div.innerHTML +=
+      '<i style="background:' + getColorMethane(grades[i] + 0.01) + '"></i> ' +
+      grades[i] + (grades[i + 1] ? '&ndash;' + grades[i + 1] + '<br>' : '+');
+  }
+  return div;
+};
+
+var so2Legend = L.control({position: 'bottomright'});
+so2Legend.onAdd = function () {
+  var div = L.DomUtil.create('div', 'legend'),
+      grades = [0.0000024, 0.0000105, 0.0000185, 0.0000266, 0.0000346];
+  div.innerHTML = '<b>SO₂ (mol/m²)</b><br>';
+  for (var i = 0; i < grades.length; i++) {
+    div.innerHTML +=
+      '<i style="background:' + getColorSO2(grades[i] + 0.0000001) + '"></i> ' +
+      grades[i].toExponential(2) + (grades[i + 1] ? '&ndash;' + grades[i + 1].toExponential(2) + '<br>' : '+');
+  }
+  return div;
+};
+
+// ====================
+// Layers
+// ====================
+var methaneLayer = L.geoJson(null, {
+  style: f => ({
+    color: "black",
+    weight: 1,
+    fillColor: getColorMethane(f.properties.ch4_mean),
+    fillOpacity: 0.7
+  }),
+  onEachFeature: (f, l) => {
+    l.bindPopup(`<b>State:</b> ${f.properties.Country}<br>
+                 <b>Methane (CH₄):</b> ${f.properties.ch4_mean} mol fraction`);
+  }
+});
+
+var so2Layer = L.geoJson(null, {
+  style: f => ({
+    color: "black",
+    weight: 1,
+    fillColor: getColorSO2(f.properties.so2_mean),
+    fillOpacity: 0.7
+  }),
+  onEachFeature: (f, l) => {
+    l.bindPopup(`<b>State:</b> ${f.properties.Country}<br>
+                 <b>Sulphur Dioxide (SO₂):</b> ${f.properties.so2_mean} mol/m²`);
+  }
+});
+
+// ====================
+// Load Data from GitHub
+// ====================
+fetch("https://raw.githubusercontent.com/Nellchris/Nigeria_Air_Quality_Monitoring_2024/refs/heads/main/Nigeria_ch4_2024.json")
+  .then(r => r.json())
+  .then(data => methaneLayer.addData(data));
+
+fetch("https://raw.githubusercontent.com/Nellchris/Nigeria_Air_Quality_Monitoring_2024/refs/heads/main/Nigeria_so2_2024.json")
+  .then(r => r.json())
+  .then(data => so2Layer.addData(data));
+
+// ====================
+// Layer Control + Legend Switching
+// ====================
+var baseMaps = {
+  "Methane (CH₄)": methaneLayer,
+  "Sulphur Dioxide (SO₂)": so2Layer
+};
+
+L.control.layers(baseMaps, null).addTo(map);
+
+// Default layer
+methaneLayer.addTo(map);
+methaneLegend.addTo(map);
+
+// Switch legends with layer
+map.on('baselayerchange', function(e) {
+  if (e.name === "Methane (CH₄)") {
+    map.removeControl(so2Legend);
+    methaneLegend.addTo(map);
+  } else if (e.name === "Sulphur Dioxide (SO₂)") {
+    map.removeControl(methaneLegend);
+    so2Legend.addTo(map);
+  }
+});
+</script>
 </body>
 </html>
