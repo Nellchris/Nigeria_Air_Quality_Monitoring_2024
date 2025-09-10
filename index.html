@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Nigeria Methane and Sulphur Dioxide Monitoring 2024</title>
+
+  <!-- Leaflet CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+  <style>
+    body { margin: 0; padding: 0;}
+    #map { width: 100%; height: 100vh;}
+  </style>
+</head>
+<body>
+  <div id="map"></div>
+
+  <!-- Leaflet JS -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+  <script src="lib/L.Geoserver.js"></script>
+
+  <script>
+  
+    // Map Initialization
+    var map = L.map("map").setView([9.1, 8.6], 2);
+
+    // OSM Layer
+    var osm = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+    }).addTo(map);
+
+// methane
+    var ch4wmsLayer = L.Geoserver.wms("http://localhost:8080/geoserver/wms", {
+  layers: "Nigeria_ch4_2024",
+});
+
+var ch4wfsLayer = L.Geoserver.wfs("http://localhost:8080/geoserver/wfs", {
+   layers: "Nigeria_ch4_2024",
+  style: {
+    color: "black",
+    fillOpacity: 0.1,
+    opacity: 0.3,
+  },
+  onEachFeature: function (feature, layer) {
+  var tooltipContent = "<b>State: </b>" + feature.properties.Country;
+
+  layer.bindTooltip(tooltipContent, {
+    permanent: false,   // only show on hover
+    direction: "top",   // position relative to cursor
+    sticky: true        // makes it follow the cursor
+  });
+}
+});
+ch4wfsLayer.addTo(map);
+
+// sulphur dioxide
+    var so2wmsLayer = L.Geoserver.wms("http://localhost:8080/geoserver/wms", {
+  layers: "Nigeria_so2_2024",
+});
+
+var so2wfsLayer = L.Geoserver.wfs("http://localhost:8080/geoserver/wfs", {
+   layers: "Nigeria_so2_2024",
+  style: {
+    color: "black",
+    fillOpacity: 0.1,
+    opacity: 0.3,
+  },
+  onEachFeature: function (feature, layer) {
+  var tooltipContent = "<b>State: </b>" + feature.properties.Country;
+
+  layer.bindTooltip(tooltipContent, {
+    permanent: false,   // only show on hover
+    direction: "top",   // position relative to cursor
+    sticky: true        // makes it follow the cursor
+  });
+}
+});
+so2wfsLayer.addTo(map);
+
+// methane legend
+var ch4Legend = L.Geoserver.legend("http://localhost:8080/geoserver/wms", {
+  layers: "Nigeria_ch4_2024",
+  //style: `stylefile`,
+});
+
+
+// sulphur dioxide legend
+var so2Legend = L.Geoserver.legend("http://localhost:8080/geoserver/wms", {
+  layers: "Nigeria_so2_2024",
+  //style: `stylefile`,
+});
+
+    
+var baseMaps = {
+  "Methane (CH₄)": ch4wmsLayer,
+  "Sulphur Dioxide (SO₂)": so2wmsLayer
+};
+L.control.layers(baseMaps, null, {collapsed:false}).addTo(map);
+
+// Default = Methane layer + legend
+ch4wmsLayer.addTo(map);
+ch4Legend.addTo(map);
+
+// Listen for base layer changes
+map.on("baselayerchange", function(e) {
+  if (e.name === "Methane (CH₄)") {
+    map.addControl(ch4Legend);
+    map.removeControl(so2Legend);
+  }
+  if (e.name === "Sulphur Dioxide (SO₂)") {
+    map.addControl(so2Legend);
+    map.removeControl(ch4Legend);
+  }
+});
+
+    // === Add the info control here ===
+    var info = L.control({position: 'topleft'});
+
+    info.onAdd = function (map) {
+      var div = L.DomUtil.create('div', 'info'); 
+      div.innerHTML = `
+        <h4>Nigeria Methane and Sulphur Dioxide Monitoring 2024</h4>
+        <p>
+          This interactive map shows state-level averages of 
+          <b>Methane (CH₄)</b> and <b>Sulphur Dioxide (SO₂)</b> 
+          concentrations derived from Sentinel-5P dataset for 2024.
+        </p>
+        <p>
+          • Use the <b>layer switcher</b> (top-right) to toggle between CH₄ and SO₂.<br>
+          • The legend updates automatically for the selected pollutant.<br>
+          • Each state is coloured based on its average concentration.
+        </p>
+        <p style="font-size:11px; color:gray;">
+          Data Source: Copernicus Sentinel-5P (ESA), Processed on Google Earth Engine, 
+          Served via GeoServer.
+        </p>
+      `;
+      return div;
+    };
+
+    info.addTo(map);
+  </script>
+
+<style>
+  .info {
+      padding: 8px 12px;
+      background: white;
+      box-shadow: 0 0 15px rgba(0,0,0,0.2);
+      border-radius: 6px;
+      font-size: 13px;
+      line-height: 1.4em;
+      max-width: 250px;
+    }
+    .info h4 {
+      margin: 0 0 5px;
+      color: #444;
+      font-size: 14px;
+    }
+</style>
+</body>
+</html>
